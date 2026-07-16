@@ -15,18 +15,18 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 1.5 Create a `docker-compose.yml` that runs PostgreSQL 15 + pgvector alongside the FastAPI dev server and verify the backend connection.
   - [x] 1.6 Configure pytest with `hypothesis` (`@settings(max_examples=100)`) and Vitest + Testing Library for the frontend; add a CI-ready test runner script.
 
-- [ ] 2. Ingestion Service
+- [x] 2. Ingestion Service
   Implement PDF ingestion including validation, deduplication, subject association, and document management endpoints.
-  - [-] 2.1 Implement `POST /ingest` — accept `multipart/form-data` with `file` and optional `subject_id`; validate `application/pdf` content-type and ≤ 50 MB size; return `400` with `"file_type_invalid"` or `"file_size_exceeded"` on failure.
-  - [~] 2.2 Implement SHA-256 content-hash computation over raw file bytes; store a `documents` record with `filename`, `uploaded_at`, `subject_id`, `source_type`, and `content_hash`; return `{ document_id: UUID }` on success.
-  - [~] 2.3 Implement duplicate detection — if a document with the same `content_hash` already exists, return `409 Conflict` with `{ error: "duplicate_content", existing_document_id }` and write no new record.
-  - [~] 2.4 Implement `GET /documents` and `DELETE /documents/{document_id}` endpoints.
-  - [~] 2.5 Write property-based tests (Hypothesis) for Property 1 (file validation predicate), Property 2 (SHA-256 dedupe idempotency), Property 3 (valid upload returns UUID document_id), and Property 4 (hash determinism) — min 100 examples each.
-  - [~] 2.6 Write unit tests for: valid upload happy path, each rejection reason (type, size, duplicate), and partial storage failure rollback.
+  - [x] 2.1 Implement `POST /ingest` — accept `multipart/form-data` with `file` and optional `subject_id`; validate `application/pdf` content-type and ≤ 50 MB size; return `400` with `"file_type_invalid"` or `"file_size_exceeded"` on failure.
+  - [x] 2.2 Implement SHA-256 content-hash computation over raw file bytes; store a `documents` record with `filename`, `uploaded_at`, `subject_id`, `source_type`, and `content_hash`; return `{ document_id: UUID }` on success.
+  - [x] 2.3 Implement duplicate detection — if a document with the same `content_hash` already exists, return `409 Conflict` with `{ error: "duplicate_content", existing_document_id }` and write no new record.
+  - [x] 2.4 Implement `GET /documents` and `DELETE /documents/{document_id}` endpoints.
+  - [x] 2.5 Write property-based tests (Hypothesis) for Property 1 (file validation predicate), Property 2 (SHA-256 dedupe idempotency), Property 3 (valid upload returns UUID document_id), and Property 4 (hash determinism) — min 100 examples each.
+  - [x] 2.6 Write unit tests for: valid upload happy path, each rejection reason (type, size, duplicate), and partial storage failure rollback.
 
 - [ ] 3. PDF Parsing Service
   Extract text, headings, formulas, tables, and figures from PDFs; produce token-bounded chunks with page attribution.
-  - [~] 3.1 Implement PyMuPDF-based text extraction per page — extract headings, body text, formulas, tables, and figure regions with bounding boxes and caption text; record page number for every segment.
+  - [-] 3.1 Implement PyMuPDF-based text extraction per page — extract headings, body text, formulas, tables, and figure regions with bounding boxes and caption text; record page number for every segment.
   - [~] 3.2 Implement Tesseract OCR fallback — apply OCR only on pages yielding zero characters from PyMuPDF; log unprocessable pages as `{ document_id, page_number, reason: "no_text_extracted" }`.
   - [~] 3.3 Implement the sliding-window sentence-boundary chunk splitter (400–600 tokens, hard-split at 600 with `[truncated]` marker, merge final chunks below 400 tokens with the previous); each chunk carries `{ document_id, page_number, text, token_count }`.
   - [~] 3.4 Store all chunks to the Knowledge Store; if any single chunk write fails, halt storage for the document, rollback, and surface an error with the document ID.
