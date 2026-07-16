@@ -60,25 +60,25 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 6.5 Enforce minimum 10 historical `note_versions` records per topic; never delete `note_versions` rows.
   - [x] 6.6 Write property-based tests for Property 9 (unchanged hash causes no downstream processing), Property 10 (changed hash triggers version increment), and Property 11 (version history is monotonically growing) — min 100 examples each.
 
-- [ ] 7. Grounded Note Generation Service
+- [x] 7. Grounded Note Generation Service
   Implement RAG-grounded note generation at three depths with citation enforcement, confidence self-assessment, and the similarity-gate refusal.
-  - [ ] 7.1 Implement `POST /generate-notes` — validate `topic_id` (UUID, must exist) and `depth` (`2mark` | `6mark` | `10mark`); return `400` for invalid inputs without triggering retrieval.
-  - [ ] 7.2 Implement retrieval: call `GET /search` for top-5 chunks scoped to `topic_id`; gate generation if `max(cosine_similarity) < 0.5` — return `422 "Not covered in provided material"` and write no note record.
-  - [ ] 7.3 Implement depth-tiered generation prompt (`C2`) — 2-mark: 2–4 sentences; 6-mark: definition + explanation + example; 10-mark: definition, 3+ sub-points, worked example, diagram reference, advantages/comparison; every paragraph must include a `(Source: filename.pdf, p.N)` citation.
-  - [ ] 7.4 Parse the `CONFIDENCE: grounded|partial|needs_review` line from LLM output and store it as the initial `confidence` badge.
-  - [ ] 7.5 Store the note record (`topic_id`, `version`, `depth`, `content_md`, `confidence`, `generated_at`) only after the Confidence Validator completes; return `{ note_id, confidence, content_md }` on success.
-  - [ ] 7.6 Implement `GET /notes/{topic_id}` and `POST /topics/{id}/regenerate` endpoints.
-  - [ ] 7.7 Write property-based tests for Property 15 (low similarity triggers refusal, no note written), Property 16 (every paragraph has a citation), and Property 17 (confidence badge is always a valid value) — min 100 examples each.
-  - [ ] 7.8 Write unit tests for: each depth level output structure, refusal when similarity < 0.5, and LLM failure rollback.
+  - [x] 7.1 Implement `POST /generate-notes` — validate `topic_id` (UUID, must exist) and `depth` (`2mark` | `6mark` | `10mark`); return `400` for invalid inputs without triggering retrieval.
+  - [x] 7.2 Implement retrieval: call `GET /search` for top-5 chunks scoped to `topic_id`; gate generation if `max(cosine_similarity) < 0.5` — return `422 "Not covered in provided material"` and write no note record.
+  - [x] 7.3 Implement depth-tiered generation prompt (`C2`) — 2-mark: 2–4 sentences; 6-mark: definition + explanation + example; 10-mark: definition, 3+ sub-points, worked example, diagram reference, advantages/comparison; every paragraph must include a `(Source: filename.pdf, p.N)` citation.
+  - [x] 7.4 Parse the `CONFIDENCE: grounded|partial|needs_review` line from LLM output and store it as the initial `confidence` badge.
+  - [x] 7.5 Store the note record (`topic_id`, `version`, `depth`, `content_md`, `confidence`, `generated_at`) only after the Confidence Validator completes; return `{ note_id, confidence, content_md }` on success.
+  - [x] 7.6 Implement `GET /notes/{topic_id}` and `POST /topics/{id}/regenerate` endpoints.
+  - [x] 7.7 Write property-based tests for Property 15 (low similarity triggers refusal, no note written), Property 16 (every paragraph has a citation), and Property 17 (confidence badge is always a valid value) — min 100 examples each.
+  - [x] 7.8 Write unit tests for: each depth level output structure, refusal when similarity < 0.5, and LLM failure rollback.
 
-- [ ] 8. Confidence Validator
+- [x] 8. Confidence Validator
   Implement the second-pass hallucination-detection validator; flag unsupported sentences and downgrade badges.
-  - [ ] 8.1 Implement the Confidence Validator using prompt `C8` — second LLM call (cheaper/faster model) that checks each note sentence against cited chunks; flag sentences with cosine similarity < 0.5 against all cited chunks as unsupported.
-  - [ ] 8.2 Implement badge downgrade logic — if any unsupported sentence is found, unconditionally set `confidence = "needs_review"` on the note record regardless of self-assessed badge.
-  - [ ] 8.3 Store flagged sentences in the `validation_flags` table (`note_id`, `flagged_sentence`, `flagged_at`); never embed flags in note content.
-  - [ ] 8.4 Implement validator failure handling — if the LLM call fails or times out (> 30 seconds), preserve the existing badge unchanged and log the failure with `note_id`; do not abort note storage.
-  - [ ] 8.5 Enforce validator is read-only on `content_md` — the note text must never be modified.
-  - [ ] 8.6 Write property-based tests for Property 18 (validator only downgrades, never upgrades) and Property 19 (validator does not mutate note content) — min 100 examples each.
+  - [x] 8.1 Implement the Confidence Validator using prompt `C8` — second LLM call (cheaper/faster model) that checks each note sentence against cited chunks; flag sentences with cosine similarity < 0.5 against all cited chunks as unsupported.
+  - [x] 8.2 Implement badge downgrade logic — if any unsupported sentence is found, unconditionally set `confidence = "needs_review"` on the note record regardless of self-assessed badge.
+  - [x] 8.3 Store flagged sentences in the `validation_flags` table (`note_id`, `flagged_sentence`, `flagged_at`); never embed flags in note content.
+  - [x] 8.4 Implement validator failure handling — if the LLM call fails or times out (> 30 seconds), preserve the existing badge unchanged and log the failure with `note_id`; do not abort note storage.
+  - [x] 8.5 Enforce validator is read-only on `content_md` — the note text must never be modified.
+  - [x] 8.6 Write property-based tests for Property 18 (validator only downgrades, never upgrades) and Property 19 (validator does not mutate note content) — min 100 examples each.
 
 - [ ] 9. Syllabus Coverage Tracker
   Compute and expose real-time coverage metrics via `GET /coverage`.
@@ -97,15 +97,15 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 10.6 Write property-based tests for Property 21 (PYQ field validation predicate), Property 22 (topic importance deterministically computed), and Property 23 (unseen topics default to `frequency_count = 0`) — min 100 examples each.
   - [x] 10.7 Write unit tests for: valid/invalid field combinations, unmatched topic handling, and SQL count verification.
 
-- [ ] 11. Mock Exam Paper Assembler
+- [x] 11. Mock Exam Paper Assembler
   Implement PYQ-weighted mock paper assembly with importance ordering, tie-breaking, and insufficient-bank handling.
-  - [ ] 11.1 Implement `POST /mock-paper` — accept `subject_id`, `total_marks_target` (positive integer), and `question_type_distribution` (e.g., `2×10mark + 4×6mark + 4×2mark`).
-  - [ ] 11.2 Implement selection logic — rank unique questions by `topic_importance` descending; break ties by most recent year; select uniformly at random if all scores are 0.
-  - [ ] 11.3 Finalize the paper when `total_marks_target` is reached even if the distribution is not exactly satisfied.
-  - [ ] 11.4 If the PYQ bank cannot satisfy the minimum distribution, assemble with all available questions and return a warning listing unsatisfied question types; do not abort silently.
-  - [ ] 11.5 Return assembled questions ordered by marks descending with `topic_tag` and `marks` per question.
-  - [ ] 11.6 Write property-based tests for Property 24 (mock paper ordering respects topic importance; ties broken by year) — min 100 examples.
-  - [ ] 11.7 Write unit tests for: importance-ordered selection, tie-breaking by year, and insufficient-bank warning.
+  - [x] 11.1 Implement `POST /mock-paper` — accept `subject_id`, `total_marks_target` (positive integer), and `question_type_distribution` (e.g., `2×10mark + 4×6mark + 4×2mark`).
+  - [x] 11.2 Implement selection logic — rank unique questions by `topic_importance` descending; break ties by most recent year; select uniformly at random if all scores are 0.
+  - [x] 11.3 Finalize the paper when `total_marks_target` is reached even if the distribution is not exactly satisfied.
+  - [x] 11.4 If the PYQ bank cannot satisfy the minimum distribution, assemble with all available questions and return a warning listing unsatisfied question types; do not abort silently.
+  - [x] 11.5 Return assembled questions ordered by marks descending with `topic_tag` and `marks` per question.
+  - [x] 11.6 Write property-based tests for Property 24 (mock paper ordering respects topic importance; ties broken by year) — min 100 examples.
+  - [x] 11.7 Write unit tests for: importance-ordered selection, tie-breaking by year, and insufficient-bank warning.
 
 - [ ] 12. Spaced Repetition Flashcard System
   Implement flashcard generation from notes, SM-2 scheduling, and all flashcard endpoints.

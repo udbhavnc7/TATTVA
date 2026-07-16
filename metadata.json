@@ -1,0 +1,6 @@
+{
+  "name": "Tattva",
+  "description": "AI-powered Exam Preparation & Study Note Generator for engineering students",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

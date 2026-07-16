@@ -35,6 +35,7 @@ from app.db.session import get_db
 from app.services.knowledge_store import service
 from app.services.knowledge_store import pyq_service
 from app.services.knowledge_store import formula_service
+from app.services.knowledge_store import mock_paper_service
 
 router = APIRouter(prefix="", tags=["knowledge_store"])
 
@@ -599,4 +600,80 @@ async def export_formulas(subject_id: uuid.UUID) -> Response:
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },
+    )
+
+
+# ===========================================================================
+# Mock Exam Paper Assembler endpoints (Task 11)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Pydantic schemas for Mock Paper
+# ---------------------------------------------------------------------------
+
+
+class MockPaperRequest(BaseModel):
+    subject_id: uuid.UUID
+    total_marks_target: int = Field(..., gt=0, description="Total marks target (positive integer)")
+    question_type_distribution: str = Field(
+        ...,
+        description="Distribution string, e.g. '2×10mark + 4×6mark + 4×2mark'",
+    )
+
+
+class MockPaperQuestionItem(BaseModel):
+    id: str
+    year: int
+    question_text: str
+    marks: int
+    topic_tag: str
+    topic_id: Optional[str]
+
+
+class MockPaperResponse(BaseModel):
+    questions: List[MockPaperQuestionItem]
+    total_marks: int
+    warnings: List[str]
+
+
+# ---------------------------------------------------------------------------
+# POST /mock-paper — assemble a mock exam paper
+# ---------------------------------------------------------------------------
+
+
+@router.post("/mock-paper", response_model=MockPaperResponse)
+async def create_mock_paper(body: MockPaperRequest) -> MockPaperResponse:
+    """
+    POST /mock-paper — assemble a mock exam paper.
+
+    Accepts:
+      - subject_id: UUID
+      - total_marks_target: positive integer
+      - question_type_distribution: e.g. "2×10mark + 4×6mark + 4×2mark"
+
+    Selection logic:
+      - Rank by topic_importance (frequency_count) descending.
+      - Ties broken by most recent year.
+      - If all scores are 0, select uniformly at random.
+
+    Stops when total_marks_target is reached (even if distribution not satisfied).
+
+    If the PYQ bank cannot satisfy the distribution, includes a warning per
+    unsatisfied type. Does NOT abort silently.
+
+    Returns assembled questions ordered by marks descending, each with
+    topic_tag and marks. Also returns total_marks and warnings list.
+    """
+    async with get_db() as session:
+        result = await mock_paper_service.build_mock_paper(
+            session=session,
+            subject_id=body.subject_id,
+            total_marks_target=body.total_marks_target,
+            question_type_distribution=body.question_type_distribution,
+        )
+
+    return MockPaperResponse(
+        questions=[MockPaperQuestionItem(**q) for q in result["questions"]],
+        total_marks=result["total_marks"],
+        warnings=result["warnings"],
     )

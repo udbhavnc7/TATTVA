@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Default: Sophisticated Dark */
+  --slate-950: #0a0a0a;
+  --slate-900: #0c0c0c;
+  --slate-850: #0f0f0f;
+  --slate-800: #141414;
+  --slate-700: #222222;
+  --slate-600: #333333;
+  --slate-500: #444444;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  
+  --accent-blue: #D4AF37;
+  --accent-teal: #D4AF37;
+  --accent-purple: #8A6D3B;
+  
+  --gold: #D4AF37;
+  --gold-dark: #8A6D3B;
+
+  --scroll-bg: #0a0a0a;
+  --scroll-thumb: #222222;
+  --scroll-hover: #333333;
+}
+
+html.light {
+  /* Classic Light Theme */
+  --slate-950: #f8fafc; /* Clean page background */
+  --slate-900: #ffffff; /* Clean white card and sidebar backgrounds */
+  --slate-850: #f1f5f9; /* Muted inner card layers */
+  --slate-800: #e2e8f0; /* Borders */
+  --slate-700: #cbd5e1; /* Hover states or secondary borders */
+  --slate-600: #94a3b8; /* Weak borders or intermediate elements */
+  --slate-500: #64748b; /* Secondary text */
+  --slate-400: #475569; /* Medium contrast text */
+  --slate-300: #334155; /* Main readable text color */
+  --slate-200: #1e293b; /* Bold heading texts */
+  --slate-100: #0f172a; /* Strongest/darkest text */
+  
+  --accent-blue: #B58900; /* Sophisticated light-theme golden bronze */
+  --accent-teal: #9b7200;
+  --accent-purple: #705000;
+  
+  --gold: #B58900;
+  --gold-dark: #705000;
+
+  --scroll-bg: #f8fafc;
+  --scroll-thumb: #cbd5e1;
+  --scroll-hover: #94a3b8;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-slate-950: var(--slate-950);
+  --color-slate-900: var(--slate-900);
+  --color-slate-850: var(--slate-850);
+  --color-slate-800: var(--slate-800);
+  --color-slate-700: var(--slate-700);
+  --color-slate-600: var(--slate-600);
+  --color-slate-500: var(--slate-500);
+  --color-slate-400: var(--slate-400);
+  --color-slate-300: var(--slate-300);
+  --color-slate-200: var(--slate-200);
+  --color-slate-100: var(--slate-100);
+  
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-teal: var(--accent-teal);
+  --color-accent-purple: var(--accent-purple);
+  
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+}
+
+/* Base resets & custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-hover);
+}
+
+/* Custom Mermaid inline style rules */
+.mermaid {
+  background: var(--slate-800) !important;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--slate-700);
+  display: flex;
+  justify-content: center;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@utility animate-shimmer {
+  background: linear-gradient(90deg, var(--slate-900) 25%, var(--slate-800) 50%, var(--slate-900) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+
