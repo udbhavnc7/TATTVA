@@ -42,14 +42,14 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [ ] 4.5 Write property-based tests for Property 7 (classification output always conforms to schema) and Property 8 (low-confidence `note` is present and ≤ 200 chars) — min 100 examples each.
   - [ ] 4.6 Write unit tests for: high/medium/low confidence paths, retry-then-fail path, and new taxonomy record creation order.
 
-- [ ] 5. Knowledge Store — CRUD, Semantic Search, and Subject Management
+- [x] 5. Knowledge Store — CRUD, Semantic Search, and Subject Management
   Implement all Knowledge Store endpoints including semantic search, subject/module CRUD, and chunk tagging enforcement.
-  - [ ] 5.1 Implement `POST /subjects` and `GET /subjects` — enforce uniqueness on subject `code` (4–10 alphanumeric characters); return `409` with duplicate-code error on conflict.
-  - [ ] 5.2 Implement `POST /subjects/{id}/modules` and `GET /subjects/{id}/modules`.
-  - [ ] 5.3 Implement `GET /topics/{topic_id}` endpoint.
-  - [ ] 5.4 Implement `GET /search?q=<text>&topic_id=<UUID>&k=<integer>` — generate query embedding, run pgvector cosine similarity search filtered by `topic_id`, return top-k results sorted descending by similarity including `source_filename`, `page_number`, `chunk_id`, `text`, and `cosine_similarity`; default `k=5`; return `500` on search failure.
-  - [ ] 5.5 Enforce that every stored chunk carries non-null `subject_id`, `module_id`, `topic_id`, `document_id`, and `page_number`.
-  - [ ] 5.6 Write property-based tests for Property 12 (every chunk carries all five required tags), Property 13 (search results correctly ordered and attributed), and Property 14 (subject code uniqueness invariant) — min 100 examples each.
+  - [x] 5.1 Implement `POST /subjects` and `GET /subjects` — enforce uniqueness on subject `code` (4–10 alphanumeric characters); return `409` with duplicate-code error on conflict.
+  - [x] 5.2 Implement `POST /subjects/{id}/modules` and `GET /subjects/{id}/modules`.
+  - [x] 5.3 Implement `GET /topics/{topic_id}` endpoint.
+  - [x] 5.4 Implement `GET /search?q=<text>&topic_id=<UUID>&k=<integer>` — generate query embedding, run pgvector cosine similarity search filtered by `topic_id`, return top-k results sorted descending by similarity including `source_filename`, `page_number`, `chunk_id`, `text`, and `cosine_similarity`; default `k=5`; return `500` on search failure.
+  - [x] 5.5 Enforce that every stored chunk carries non-null `subject_id`, `module_id`, `topic_id`, `document_id`, and `page_number`.
+  - [x] 5.6 Write property-based tests for Property 12 (every chunk carries all five required tags), Property 13 (search results correctly ordered and attributed), and Property 14 (subject code uniqueness invariant) — min 100 examples each.
 
 - [ ] 6. Incremental Diff Pipeline and Version History
   Implement content-hash diffing so only changed topic blocks trigger re-generation; all regenerations produce immutable version records.
