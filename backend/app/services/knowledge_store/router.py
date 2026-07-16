@@ -8,18 +8,25 @@ Endpoints (mounted at root — no prefix):
     GET    /subjects/{id}/modules     — List modules for a subject
     GET    /topics/{topic_id}         — Get topic details
     GET    /search                    — Semantic chunk search (?q=&k=&topic_id=)
+
+PYQ Analyzer endpoints (Task 10):
+    POST   /pyqs                      — Ingest a PYQ (validates year/marks/question_text)
+    GET    /pyqs                      — List PYQs with optional filters
+    POST   /pyqs/recalculate          — Deterministic SQL importance recalculation
+    GET    /topics/{id}/importance    — Get topic importance score
 """
 
 from __future__ import annotations
 
 import uuid
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.db.session import get_db
 from app.services.knowledge_store import service
+from app.services.knowledge_store import pyq_service
 
 router = APIRouter(prefix="", tags=["knowledge_store"])
 
@@ -280,3 +287,192 @@ async def search_chunks(
 async def health() -> dict:
     """Health-check for the Knowledge Store Service."""
     return {"service": "knowledge_store", "status": "ok"}
+
+
+# ===========================================================================
+# PYQ Analyzer endpoints (Task 10)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Pydantic schemas for PYQ
+# ---------------------------------------------------------------------------
+
+
+class PyqCreate(BaseModel):
+    subject_id: uuid.UUID
+    year: int
+    question_text: str
+    marks: int
+    difficulty: Optional[str] = None
+    secondary_topics: Optional[List[uuid.UUID]] = Field(default_factory=list)
+
+
+class PyqResponse(BaseModel):
+    id: str
+    subject_id: str
+    year: int
+    question_text: str
+    marks: int
+    topic_id: Optional[str]
+    is_unmatched: bool
+    difficulty: Optional[str]
+    difficulty_note: Optional[str]
+    secondary_topics: Optional[List[str]]
+    created_at: str
+
+    @classmethod
+    def from_orm_obj(cls, obj: Any) -> "PyqResponse":
+        sec = []
+        if obj.secondary_topics:
+            sec = [str(t) for t in obj.secondary_topics]
+        return cls(
+            id=str(obj.id),
+            subject_id=str(obj.subject_id),
+            year=obj.year,
+            question_text=obj.question_text,
+            marks=obj.marks,
+            topic_id=str(obj.topic_id) if obj.topic_id else None,
+            is_unmatched=obj.is_unmatched,
+            difficulty=obj.difficulty,
+            difficulty_note=obj.difficulty_note,
+            secondary_topics=sec,
+            created_at=obj.created_at.isoformat(),
+        )
+
+
+class TopicImportanceResponse(BaseModel):
+    topic_id: str
+    frequency_count: int
+    difficulty_avg: Optional[float]
+    last_recalculated: Optional[str]
+
+
+class RecalculateResponse(BaseModel):
+    status: str
+    rows_affected: int
+
+
+# ---------------------------------------------------------------------------
+# POST /pyqs — ingest a PYQ
+# ---------------------------------------------------------------------------
+
+
+@router.post("/pyqs", status_code=201)
+async def create_pyq(body: PyqCreate) -> PyqResponse:
+    """
+    POST /pyqs — ingest a new Past Year Question.
+
+    Validates:
+      - year: 2000 to current calendar year inclusive
+      - marks: 1 to 100 inclusive
+      - question_text: 10 to 2000 characters inclusive
+
+    On validation failure returns 400 with:
+      { "error": "invalid_field", "field": "<fieldname>", "detail": "<reason>" }
+
+    On success runs LLM topic matching (prompt C5) and stores the PYQ.
+    Returns 201 with the stored PYQ record.
+    """
+    # Validate fields
+    error = pyq_service.validate_pyq_fields(body.year, body.marks, body.question_text)
+    if error is not None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "invalid_field",
+                "field": error["field"],
+                "detail": error["detail"],
+            },
+        )
+
+    async with get_db() as session:
+        # LLM topic matching
+        match_result = await pyq_service.match_topic_for_pyq(
+            session, body.question_text, body.subject_id
+        )
+
+        # Use caller-supplied difficulty if provided; otherwise use LLM result
+        difficulty = body.difficulty or match_result["difficulty"]
+        if difficulty not in pyq_service.VALID_DIFFICULTIES:
+            difficulty = match_result["difficulty"]
+
+        pyq = await pyq_service.create_pyq(
+            session=session,
+            subject_id=body.subject_id,
+            year=body.year,
+            question_text=body.question_text,
+            marks=body.marks,
+            topic_id=match_result["topic_id"],
+            is_unmatched=match_result["is_unmatched"],
+            difficulty=difficulty,
+            difficulty_note=match_result["difficulty_note"],
+            secondary_topics=body.secondary_topics,
+        )
+        return PyqResponse.from_orm_obj(pyq)
+
+
+# ---------------------------------------------------------------------------
+# GET /pyqs — list PYQs with optional filters
+# ---------------------------------------------------------------------------
+
+
+@router.get("/pyqs")
+async def list_pyqs(
+    subject_id: Optional[uuid.UUID] = Query(None, description="Filter by subject UUID"),
+    topic_id: Optional[uuid.UUID] = Query(None, description="Filter by topic UUID"),
+    is_unmatched: Optional[bool] = Query(None, description="Filter by unmatched status"),
+) -> list[PyqResponse]:
+    """
+    GET /pyqs — return PYQs with optional filters.
+
+    Query parameters (all optional):
+      - subject_id: UUID
+      - topic_id: UUID
+      - is_unmatched: bool
+    """
+    async with get_db() as session:
+        pyqs = await pyq_service.get_pyqs(
+            session,
+            subject_id=subject_id,
+            topic_id=topic_id,
+            is_unmatched=is_unmatched,
+        )
+        return [PyqResponse.from_orm_obj(p) for p in pyqs]
+
+
+# ---------------------------------------------------------------------------
+# POST /pyqs/recalculate — deterministic SQL importance recalculation
+# ---------------------------------------------------------------------------
+
+
+@router.post("/pyqs/recalculate")
+async def recalculate_importance() -> RecalculateResponse:
+    """
+    POST /pyqs/recalculate — trigger deterministic SQL topic importance recalculation.
+
+    Runs: INSERT INTO topic_importance ... SELECT COUNT(*) GROUP BY topic_id ...
+    ON CONFLICT DO UPDATE
+
+    This endpoint NEVER calls an LLM. Frequency counting is purely SQL.
+    Must complete in ≤ 10 seconds for 500 PYQ records.
+    """
+    async with get_db() as session:
+        rows = await pyq_service.recalculate_topic_importance(session)
+        return RecalculateResponse(status="ok", rows_affected=rows)
+
+
+# ---------------------------------------------------------------------------
+# GET /topics/{id}/importance — get topic importance score
+# ---------------------------------------------------------------------------
+
+
+@router.get("/topics/{topic_id}/importance")
+async def get_topic_importance(topic_id: uuid.UUID) -> TopicImportanceResponse:
+    """
+    GET /topics/{id}/importance — return the topic_importance record.
+
+    If no record exists (topic has no matched PYQs), returns frequency_count = 0.
+    """
+    async with get_db() as session:
+        data = await pyq_service.get_topic_importance(session, topic_id)
+        return TopicImportanceResponse(**data)

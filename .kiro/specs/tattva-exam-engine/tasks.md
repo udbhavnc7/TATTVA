@@ -51,14 +51,14 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 5.5 Enforce that every stored chunk carries non-null `subject_id`, `module_id`, `topic_id`, `document_id`, and `page_number`.
   - [x] 5.6 Write property-based tests for Property 12 (every chunk carries all five required tags), Property 13 (search results correctly ordered and attributed), and Property 14 (subject code uniqueness invariant) — min 100 examples each.
 
-- [ ] 6. Incremental Diff Pipeline and Version History
+- [x] 6. Incremental Diff Pipeline and Version History
   Implement content-hash diffing so only changed topic blocks trigger re-generation; all regenerations produce immutable version records.
-  - [ ] 6.1 Implement per-topic SHA-256 hash computation from normalized topic text (strip leading/trailing whitespace, collapse internal whitespace, NFC Unicode normalize).
-  - [ ] 6.2 Implement hash comparison logic — skip all downstream steps on hash match; run the full pipeline on first ingestion (no stored hash) or hash change.
-  - [ ] 6.3 On hash change: increment `topics.version`, store new `content_hash`, write a `note_versions` record (`version`, `timestamp`, `source_document_id`); roll back the entire regeneration if the `note_versions` write fails.
-  - [ ] 6.4 Implement the `force_regenerate=true` flag on `POST /generate-notes` to bypass hash comparison unconditionally.
-  - [ ] 6.5 Enforce minimum 10 historical `note_versions` records per topic; never delete `note_versions` rows.
-  - [ ] 6.6 Write property-based tests for Property 9 (unchanged hash causes no downstream processing), Property 10 (changed hash triggers version increment), and Property 11 (version history is monotonically growing) — min 100 examples each.
+  - [x] 6.1 Implement per-topic SHA-256 hash computation from normalized topic text (strip leading/trailing whitespace, collapse internal whitespace, NFC Unicode normalize).
+  - [x] 6.2 Implement hash comparison logic — skip all downstream steps on hash match; run the full pipeline on first ingestion (no stored hash) or hash change.
+  - [x] 6.3 On hash change: increment `topics.version`, store new `content_hash`, write a `note_versions` record (`version`, `timestamp`, `source_document_id`); roll back the entire regeneration if the `note_versions` write fails.
+  - [x] 6.4 Implement the `force_regenerate=true` flag on `POST /generate-notes` to bypass hash comparison unconditionally.
+  - [x] 6.5 Enforce minimum 10 historical `note_versions` records per topic; never delete `note_versions` rows.
+  - [x] 6.6 Write property-based tests for Property 9 (unchanged hash causes no downstream processing), Property 10 (changed hash triggers version increment), and Property 11 (version history is monotonically growing) — min 100 examples each.
 
 - [ ] 7. Grounded Note Generation Service
   Implement RAG-grounded note generation at three depths with citation enforcement, confidence self-assessment, and the similarity-gate refusal.
@@ -129,12 +129,12 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [ ] 14.2 Implement note round-trip: serialize `Note(content_md, confidence, depth, topic_id, generated_at)` to the `notes` table and deserialize; assert all five fields identical. Min 100 randomly generated valid inputs.
   - [ ] 14.3 Tag both tests as Property 29 and Property 30 with `@settings(max_examples=100)` and `Feature: tattva-exam-engine` docstrings.
 
-- [ ] 15. Next.js UI — Shared Layout and Navigation
+- [x] 15. Next.js UI — Shared Layout and Navigation
   Build the persistent dark-themed sidebar and global layout used by all six screens.
-  - [ ] 15.1 Implement the global dark-theme layout (`black`/`dark-gray` backgrounds, `#C9A84C` gold accent, white text) using Tailwind CSS variables and shadcn/ui tokens.
-  - [ ] 15.2 Implement the persistent sidebar with navigation links to all six screens: Syllabus Coverage, Grounded Notes, PYQ Exam Paper, Spaced Repetition, Socratic Q&A, Formula Sheet; visually indicate the active screen.
-  - [ ] 15.3 Ensure all interactive controls meet a minimum 44×44 CSS pixels tap/click target size and the layout is usable at ≥ 1280px desktop viewports.
-  - [ ] 15.4 Write Vitest + Testing Library tests confirming the sidebar renders all six links and the active link receives the correct visual indicator class.
+  - [x] 15.1 Implement the global dark-theme layout (`black`/`dark-gray` backgrounds, `#C9A84C` gold accent, white text) using Tailwind CSS variables and shadcn/ui tokens.
+  - [x] 15.2 Implement the persistent sidebar with navigation links to all six screens: Syllabus Coverage, Grounded Notes, PYQ Exam Paper, Spaced Repetition, Socratic Q&A, Formula Sheet; visually indicate the active screen.
+  - [x] 15.3 Ensure all interactive controls meet a minimum 44×44 CSS pixels tap/click target size and the layout is usable at ≥ 1280px desktop viewports.
+  - [x] 15.4 Write Vitest + Testing Library tests confirming the sidebar renders all six links and the active link receives the correct visual indicator class.
 
 - [ ] 16. UI — Syllabus Coverage Dashboard
   Build the main dashboard with circular gauge, stats grid, file panel, and syllabus outline with per-topic badges.
