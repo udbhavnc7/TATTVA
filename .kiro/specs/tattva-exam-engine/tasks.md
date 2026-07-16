@@ -145,45 +145,45 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 16.5 Implement live update — poll or subscribe so metrics refresh within 5 seconds after note generation without manual page refresh.
   - [x] 16.6 Write Vitest tests confirming the gauge renders the correct percentage and the stats grid shows correct counts for known badge distributions.
 
-- [ ] 17. UI — Grounded Notes Screen
+- [x] 17. UI — Grounded Notes Screen
   Build the module/topic browser, note display with depth tabs, confidence badges, verified-sources panel, and generate button.
-  - [ ] 17.1 Implement the left panel listing all modules; expand to show topics on module selection.
-  - [ ] 17.2 Implement the right panel with depth tabs (2-mark / 6-mark / 10-mark); show note content for the selected topic and depth; display "no note available" prompt with Generate button when no note exists.
-  - [ ] 17.3 Disable the "Generate Grounded Study Notes" button when no topic is selected; enable on topic selection and wire to `POST /generate-notes`.
-  - [ ] 17.4 Display the confidence badge (`Grounded` / `Partially Grounded` / `Needs Review`) alongside each note.
-  - [ ] 17.5 Display the "Verified Sources" panel listing cited documents and page numbers for `grounded`/`partial` notes; show "no verified sources available" for `needs_review` notes.
-  - [ ] 17.6 Display the "Note Architecture Rules" sidebar on all note views.
-  - [ ] 17.7 Render a visible amber border and warning icon on `needs_review` note cards.
-  - [ ] 17.8 Write Vitest tests for: confidence badge variant rendering, `needs_review` amber border, and disabled/enabled Generate button state.
+  - [x] 17.1 Implement the left panel listing all modules; expand to show topics on module selection.
+  - [x] 17.2 Implement the right panel with depth tabs (2-mark / 6-mark / 10-mark); show note content for the selected topic and depth; display "no note available" prompt with Generate button when no note exists.
+  - [x] 17.3 Disable the "Generate Grounded Study Notes" button when no topic is selected; enable on topic selection and wire to `POST /generate-notes`.
+  - [x] 17.4 Display the confidence badge (`Grounded` / `Partially Grounded` / `Needs Review`) alongside each note.
+  - [x] 17.5 Display the "Verified Sources" panel listing cited documents and page numbers for `grounded`/`partial` notes; show "no verified sources available" for `needs_review` notes.
+  - [x] 17.6 Display the "Note Architecture Rules" sidebar on all note views.
+  - [x] 17.7 Render a visible amber border and warning icon on `needs_review` note cards.
+  - [x] 17.8 Write Vitest tests for: confidence badge variant rendering, `needs_review` amber border, and disabled/enabled Generate button state.
 
-- [ ] 18. UI — PYQ Exam Paper Screen
+- [x] 18. UI — PYQ Exam Paper Screen
   Build the PYQ ingestion form, Topic Frequency Analysis table, and Historical Question Library.
-  - [ ] 18.1 Implement the "Ingest Past Question" form with validated fields (year, marks, question text) and inline error messages identifying the specific invalid field.
-  - [ ] 18.2 Implement the Topic Frequency Analysis table — columns: topic name, asked count, difficulty color bar (red=hard, amber=medium, green=easy), reference weight.
-  - [ ] 18.3 Implement the Historical Question Library listing each PYQ with year and difficulty badge.
-  - [ ] 18.4 Implement the "Map & Recalculate Importance" button wired to `POST /pyqs/recalculate`; show a loading indicator during recalculation.
+  - [x] 18.1 Implement the "Ingest Past Question" form with validated fields (year, marks, question text) and inline error messages identifying the specific invalid field.
+  - [x] 18.2 Implement the Topic Frequency Analysis table — columns: topic name, asked count, difficulty color bar (red=hard, amber=medium, green=easy), reference weight.
+  - [x] 18.3 Implement the Historical Question Library listing each PYQ with year and difficulty badge.
+  - [x] 18.4 Implement the "Map & Recalculate Importance" button wired to `POST /pyqs/recalculate`; show a loading indicator during recalculation.
 
-- [ ] 19. UI — Spaced Repetition Screen
+- [x] 19. UI — Spaced Repetition Screen
   Build the flashcard study center with SM-2 metadata display, topic filter, and recall score submission.
-  - [ ] 19.1 Implement the flashcard study center showing: question front, recall score input (0–5), "Submit" action, topic tag, and "Reveal Spaced Repetition Answer" button.
-  - [ ] 19.2 Implement the topic dropdown filter; update card count and due count immediately when the filter changes.
-  - [ ] 19.3 Display SM-2 metadata: total cards in the selected deck and cards due (`next_review_at <= now()`).
-  - [ ] 19.4 Write Vitest tests for: filter updates card/due counts immediately, and recall score input enforces the 0–5 range.
+  - [x] 19.1 Implement the flashcard study center showing: question front, recall score input (0–5), "Submit" action, topic tag, and "Reveal Spaced Repetition Answer" button.
+  - [x] 19.2 Implement the topic dropdown filter; update card count and due count immediately when the filter changes.
+  - [x] 19.3 Display SM-2 metadata: total cards in the selected deck and cards due (`next_review_at <= now()`).
+  - [x] 19.4 Write Vitest tests for: filter updates card/due counts immediately, and recall score input enforces the 0–5 range.
 
-- [ ] 20. UI — Formula Sheet Screen
+- [x] 20. UI — Formula Sheet Screen
   Build the formula sheet UI with KaTeX rendering, re-scan action, and Markdown export.
-  - [ ] 20.1 Implement subject selector; on selection call `GET /formulas/{subject_id}` and display the formula table.
-  - [ ] 20.2 Render equations using KaTeX so mathematical notation is human-readable rather than raw LaTeX strings.
-  - [ ] 20.3 Implement "Re-Scan Textbooks" button wired to `POST /formulas/{subject_id}/scan`; display a visible completion notification when the scan finishes.
-  - [ ] 20.4 Implement "Export Equation Table" button wired to `GET /formulas/{subject_id}/export` to trigger the `.md` file download.
+  - [x] 20.1 Implement subject selector; on selection call `GET /formulas/{subject_id}` and display the formula table.
+  - [x] 20.2 Render equations using KaTeX so mathematical notation is human-readable rather than raw LaTeX strings.
+  - [x] 20.3 Implement "Re-Scan Textbooks" button wired to `POST /formulas/{subject_id}/scan`; display a visible completion notification when the scan finishes.
+  - [x] 20.4 Implement "Export Equation Table" button wired to `GET /formulas/{subject_id}/export` to trigger the `.md` file download.
 
-- [ ] 21. Integration Tests
+- [x] 21. Integration Tests
   Verify end-to-end pipeline correctness against a real PostgreSQL + pgvector Docker instance.
-  - [ ] 21.1 End-to-end test: PDF upload → parse → classify → generate note → validate → retrieve note via API; assert confidence badge and citations are present.
-  - [ ] 21.2 Confidence Validator timing test: assert P95 completion < 30 seconds on representative note sizes.
-  - [ ] 21.3 Coverage Tracker latency test: assert metrics update within 5 seconds after note generation without manual refresh.
-  - [ ] 21.4 PYQ importance recalculation performance test: assert 500 PYQ records complete within 10 seconds.
-  - [ ] 21.5 Version history integrity test: ingest the same document with modified content 3 times; assert 3 `note_versions` records with strictly increasing version numbers and no rows deleted.
+  - [x] 21.1 End-to-end test: PDF upload → parse → classify → generate note → validate → retrieve note via API; assert confidence badge and citations are present.
+  - [x] 21.2 Confidence Validator timing test: assert P95 completion < 30 seconds on representative note sizes.
+  - [x] 21.3 Coverage Tracker latency test: assert metrics update within 5 seconds after note generation without manual refresh.
+  - [x] 21.4 PYQ importance recalculation performance test: assert 500 PYQ records complete within 10 seconds.
+  - [x] 21.5 Version history integrity test: ingest the same document with modified content 3 times; assert 3 `note_versions` records with strictly increasing version numbers and no rows deleted.
 
 ## Task Dependency Graph
 
