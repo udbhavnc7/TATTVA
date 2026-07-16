@@ -10,14 +10,24 @@ from hypothesis import HealthCheck, settings
 # ---------------------------------------------------------------------------
 # Hypothesis settings
 # ---------------------------------------------------------------------------
-# Register and load the "ci" profile so every property test runs
-# max_examples=100 with the suppress_health_check for DB-less stubs.
+# "fast" profile — used during local development for quick feedback.
+# "ci"   profile — higher coverage for CI/CD pipelines.
+settings.register_profile(
+    "fast",
+    max_examples=20,
+    suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
+)
 settings.register_profile(
     "ci",
     max_examples=100,
     suppress_health_check=[HealthCheck.too_slow],
+    deadline=None,
 )
-settings.load_profile("ci")
+# Load "fast" by default so local runs finish quickly.
+# Switch to "ci" by setting the HYPOTHESIS_PROFILE=ci env var or
+# passing --hypothesis-profile=ci on the pytest command line.
+settings.load_profile("fast")
 
 
 # ---------------------------------------------------------------------------

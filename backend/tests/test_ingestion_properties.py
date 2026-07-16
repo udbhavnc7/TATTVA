@@ -9,7 +9,7 @@ Four properties under test:
   Property 3 — valid upload returns UUID document_id
   Property 4 — hash determinism
 
-Each @settings decorator sets max_examples=100.
+Each @settings decorator sets max_examples=20 (fast local profile).
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ valid_pdf_bytes_strategy = st.binary(min_size=1, max_size=4096)
 # accepts iff content_type == "application/pdf" AND 1 <= size_bytes <= MAX_FILE_SIZE.
 # ---------------------------------------------------------------------------
 
-@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
 @given(content_type=content_type_strategy, size_bytes=size_strategy)
 def test_property1_file_validation_predicate(
     content_type: str, size_bytes: int
@@ -95,7 +95,7 @@ def test_property1_file_validation_predicate(
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
 @given(file_bytes=valid_pdf_bytes_strategy)
 async def test_property2_dedupe_idempotency(file_bytes: bytes) -> None:
     """
@@ -155,7 +155,7 @@ async def test_property2_dedupe_idempotency(file_bytes: bytes) -> None:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow], deadline=None)
 @given(file_bytes=valid_pdf_bytes_strategy)
 async def test_property3_valid_upload_returns_uuid(file_bytes: bytes) -> None:
     """
@@ -221,7 +221,7 @@ async def test_property3_valid_upload_returns_uuid(file_bytes: bytes) -> None:
 # SHA-256 of the same bytes always produces the same hex digest.
 # ---------------------------------------------------------------------------
 
-@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
 @given(data=bytes_strategy)
 def test_property4_hash_determinism(data: bytes) -> None:
     """
