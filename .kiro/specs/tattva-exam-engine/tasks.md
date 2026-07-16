@@ -80,12 +80,12 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 8.5 Enforce validator is read-only on `content_md` — the note text must never be modified.
   - [x] 8.6 Write property-based tests for Property 18 (validator only downgrades, never upgrades) and Property 19 (validator does not mutate note content) — min 100 examples each.
 
-- [ ] 9. Syllabus Coverage Tracker
+- [x] 9. Syllabus Coverage Tracker
   Compute and expose real-time coverage metrics via `GET /coverage`.
-  - [ ] 9.1 Implement `GET /coverage` — return `grounded_count`, `partial_count`, `needs_review_count`, `no_notes_count`, `total_topics`, and `coverage_percentage` using formula `round((grounded_count / total_topics) * 100)`.
-  - [ ] 9.2 Implement a database trigger or background refresh so coverage metrics update within 5 seconds after any note is generated or a badge changes — no manual page refresh required.
-  - [ ] 9.3 Expose per-topic badge status in the coverage endpoint to support the syllabus outline UI.
-  - [ ] 9.4 Write property-based tests for Property 20 (coverage percentage matches formula for any badge distribution) — min 100 examples.
+  - [x] 9.1 Implement `GET /coverage` — return `grounded_count`, `partial_count`, `needs_review_count`, `no_notes_count`, `total_topics`, and `coverage_percentage` using formula `round((grounded_count / total_topics) * 100)`.
+  - [x] 9.2 Implement a database trigger or background refresh so coverage metrics update within 5 seconds after any note is generated or a badge changes — no manual page refresh required.
+  - [x] 9.3 Expose per-topic badge status in the coverage endpoint to support the syllabus outline UI.
+  - [x] 9.4 Write property-based tests for Property 20 (coverage percentage matches formula for any badge distribution) — min 100 examples.
 
 - [x] 10. PYQ Analyzer
   Implement PYQ ingestion, LLM-based topic matching, deterministic SQL importance scoring, and frequency data endpoints.
@@ -107,14 +107,14 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 11.6 Write property-based tests for Property 24 (mock paper ordering respects topic importance; ties broken by year) — min 100 examples.
   - [x] 11.7 Write unit tests for: importance-ordered selection, tie-breaking by year, and insufficient-bank warning.
 
-- [ ] 12. Spaced Repetition Flashcard System
+- [x] 12. Spaced Repetition Flashcard System
   Implement flashcard generation from notes, SM-2 scheduling, and all flashcard endpoints.
-  - [ ] 12.1 Implement automatic flashcard generation after note creation — 4–6 flashcards per note; card front is a single focused question; card back is ≤ 40 words with a `(Source: filename.pdf, p.N)` citation; use only content from the generated note.
-  - [ ] 12.2 Implement the SM-2 update function as a pure function: `new_ef = max(1.3, ef + 0.1 - (5-q)*(0.08 + (5-q)*0.02))` with interval logic (q<3 → interval=1; q>=3 → 1/6/ef×interval on 0/1/N+ repetitions).
-  - [ ] 12.3 Implement `POST /flashcards/{id}/review` — accept `recall_score` (0–5); reject with a validation error if out of range; update `ease_factor`, `interval_days`, `repetitions`, `next_review_at`.
-  - [ ] 12.4 Implement `GET /flashcards?topic_id=&due_only=` — return card count and due count (cards where `next_review_at <= now()`).
-  - [ ] 12.5 Write property-based tests for Property 25 (flashcard count per note is 4–6), Property 26 (initial ease_factor is 2.5), Property 27 (SM-2 update is deterministic and correct), and Property 28 (invalid recall score rejected, state unchanged) — min 100 examples each.
-  - [ ] 12.6 Write unit tests for: recall score 0 restart, recall score 5 max-EF, and `next_review_at` is always in the future.
+  - [x] 12.1 Implement automatic flashcard generation after note creation — 4–6 flashcards per note; card front is a single focused question; card back is ≤ 40 words with a `(Source: filename.pdf, p.N)` citation; use only content from the generated note.
+  - [x] 12.2 Implement the SM-2 update function as a pure function: `new_ef = max(1.3, ef + 0.1 - (5-q)*(0.08 + (5-q)*0.02))` with interval logic (q<3 → interval=1; q>=3 → 1/6/ef×interval on 0/1/N+ repetitions).
+  - [x] 12.3 Implement `POST /flashcards/{id}/review` — accept `recall_score` (0–5); reject with a validation error if out of range; update `ease_factor`, `interval_days`, `repetitions`, `next_review_at`.
+  - [x] 12.4 Implement `GET /flashcards?topic_id=&due_only=` — return card count and due count (cards where `next_review_at <= now()`).
+  - [x] 12.5 Write property-based tests for Property 25 (flashcard count per note is 4–6), Property 26 (initial ease_factor is 2.5), Property 27 (SM-2 update is deterministic and correct), and Property 28 (invalid recall score rejected, state unchanged) — min 100 examples each.
+  - [x] 12.6 Write unit tests for: recall score 0 restart, recall score 5 max-EF, and `next_review_at` is always in the future.
 
 - [x] 13. Formula Scanner
   Extract formulas, equations, and algorithm pseudocode from chunks; expose as a structured downloadable Markdown table.
@@ -123,11 +123,11 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 13.3 Implement `POST /formulas/{subject_id}/scan` — re-run extraction against current Knowledge Store state and return a completion notification.
   - [x] 13.4 Implement `GET /formulas/{subject_id}/export` — return the formula table as a downloadable `.md` file.
 
-- [ ] 14. Parser/Serializer Round-Trip Integrity Tests
+- [x] 14. Parser/Serializer Round-Trip Integrity Tests
   Verify that chunk and note objects survive database serialize/deserialize with no field mutation (Properties 29 and 30).
-  - [ ] 14.1 Implement `tests/test_round_trip.py` — chunk round-trip: serialize `Chunk(text, page_number, document_id, topic_id)` to the `chunks` table and deserialize; assert all four fields identical. Min 100 randomly generated valid inputs via `st.builds(Chunk, ...)`.
-  - [ ] 14.2 Implement note round-trip: serialize `Note(content_md, confidence, depth, topic_id, generated_at)` to the `notes` table and deserialize; assert all five fields identical. Min 100 randomly generated valid inputs.
-  - [ ] 14.3 Tag both tests as Property 29 and Property 30 with `@settings(max_examples=100)` and `Feature: tattva-exam-engine` docstrings.
+  - [x] 14.1 Implement `tests/test_round_trip.py` — chunk round-trip: serialize `Chunk(text, page_number, document_id, topic_id)` to the `chunks` table and deserialize; assert all four fields identical. Min 100 randomly generated valid inputs via `st.builds(Chunk, ...)`.
+  - [x] 14.2 Implement note round-trip: serialize `Note(content_md, confidence, depth, topic_id, generated_at)` to the `notes` table and deserialize; assert all five fields identical. Min 100 randomly generated valid inputs.
+  - [x] 14.3 Tag both tests as Property 29 and Property 30 with `@settings(max_examples=100)` and `Feature: tattva-exam-engine` docstrings.
 
 - [x] 15. Next.js UI — Shared Layout and Navigation
   Build the persistent dark-themed sidebar and global layout used by all six screens.
@@ -136,14 +136,14 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 15.3 Ensure all interactive controls meet a minimum 44×44 CSS pixels tap/click target size and the layout is usable at ≥ 1280px desktop viewports.
   - [x] 15.4 Write Vitest + Testing Library tests confirming the sidebar renders all six links and the active link receives the correct visual indicator class.
 
-- [ ] 16. UI — Syllabus Coverage Dashboard
+- [x] 16. UI — Syllabus Coverage Dashboard
   Build the main dashboard with circular gauge, stats grid, file panel, and syllabus outline with per-topic badges.
-  - [ ] 16.1 Implement the circular progress gauge displaying the AI-grounded completeness percentage from `GET /coverage`.
-  - [ ] 16.2 Implement the stats grid showing counts for `grounded`, `partial`, `needs_review`, and no-notes topics.
-  - [ ] 16.3 Implement the file panel listing all uploaded documents from `GET /documents`.
-  - [ ] 16.4 Implement the syllabus outline showing all modules and topics with `grounded` / `partial` / `needs_review` / missing badges.
-  - [ ] 16.5 Implement live update — poll or subscribe so metrics refresh within 5 seconds after note generation without manual page refresh.
-  - [ ] 16.6 Write Vitest tests confirming the gauge renders the correct percentage and the stats grid shows correct counts for known badge distributions.
+  - [x] 16.1 Implement the circular progress gauge displaying the AI-grounded completeness percentage from `GET /coverage`.
+  - [x] 16.2 Implement the stats grid showing counts for `grounded`, `partial`, `needs_review`, and no-notes topics.
+  - [x] 16.3 Implement the file panel listing all uploaded documents from `GET /documents`.
+  - [x] 16.4 Implement the syllabus outline showing all modules and topics with `grounded` / `partial` / `needs_review` / missing badges.
+  - [x] 16.5 Implement live update — poll or subscribe so metrics refresh within 5 seconds after note generation without manual page refresh.
+  - [x] 16.6 Write Vitest tests confirming the gauge renders the correct percentage and the stats grid shows correct counts for known badge distributions.
 
 - [ ] 17. UI — Grounded Notes Screen
   Build the module/topic browser, note display with depth tabs, confidence badges, verified-sources panel, and generate button.

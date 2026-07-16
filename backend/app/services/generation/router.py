@@ -250,3 +250,96 @@ async def regenerate_notes(
 async def health() -> dict:
     """Health-check for the Generation Service."""
     return {"service": "generation", "status": "ok"}
+
+
+# ===========================================================================
+# Flashcard endpoints (Task 12)
+# ===========================================================================
+
+from app.services.generation import flashcard_service  # noqa: E402
+
+
+class FlashcardReviewRequest(BaseModel):
+    recall_score: int = Field(..., description="Student recall quality 0–5")
+
+
+class FlashcardReviewResponse(BaseModel):
+    flashcard_id: str
+    ease_factor: float
+    interval_days: int
+    repetitions: int
+    next_review_at: str
+
+
+class FlashcardsListResponse(BaseModel):
+    card_count: int
+    due_count: int
+
+
+# ---------------------------------------------------------------------------
+# POST /flashcards/{id}/review  (Task 12.3)
+# ---------------------------------------------------------------------------
+
+
+@router.post("/flashcards/{flashcard_id}/review", response_model=FlashcardReviewResponse)
+async def review_flashcard(
+    flashcard_id: uuid.UUID,
+    body: FlashcardReviewRequest,
+) -> FlashcardReviewResponse:
+    """
+    POST /flashcards/{id}/review
+
+    Submit a recall score (0–5) for a flashcard and update its SM-2 state.
+
+    Returns 422 if recall_score is outside [0, 5].
+    Returns 404 if the flashcard does not exist.
+    """
+    if not (0 <= body.recall_score <= 5):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "invalid_recall_score",
+                "detail": f"recall_score must be 0–5; got {body.recall_score}",
+            },
+        )
+
+    async with get_db() as session:
+        try:
+            card = await flashcard_service.submit_review(
+                session, flashcard_id, body.recall_score
+            )
+        except LookupError:
+            raise HTTPException(
+                status_code=404,
+                detail={"error": "flashcard_not_found", "flashcard_id": str(flashcard_id)},
+            )
+
+    return FlashcardReviewResponse(
+        flashcard_id=str(card.id),
+        ease_factor=float(card.ease_factor),
+        interval_days=int(card.interval_days),
+        repetitions=int(card.repetitions),
+        next_review_at=card.next_review_at.isoformat(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /flashcards  (Task 12.4)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/flashcards", response_model=FlashcardsListResponse)
+async def list_flashcards(
+    topic_id: Optional[uuid.UUID] = None,
+    due_only: bool = False,
+) -> FlashcardsListResponse:
+    """
+    GET /flashcards?topic_id=<UUID>&due_only=<bool>
+
+    Returns card_count (total) and due_count (next_review_at <= now()).
+    Optionally filtered by topic_id.
+    """
+    async with get_db() as session:
+        counts = await flashcard_service.get_flashcards(session, topic_id=topic_id, due_only=due_only)
+
+    return FlashcardsListResponse(**counts)

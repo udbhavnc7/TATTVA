@@ -13,6 +13,9 @@ PYQ Analyzer endpoints (Task 10):
     POST   /pyqs                      — Ingest a PYQ (validates year/marks/question_text)
     GET    /pyqs                      — List PYQs with optional filters
     POST   /pyqs/recalculate          — Deterministic SQL importance recalculation
+
+Coverage Tracker endpoints (Task 9):
+    GET    /coverage                  — Syllabus coverage metrics
     GET    /topics/{id}/importance    — Get topic importance score
 
 Formula Scanner endpoints (Task 13):
@@ -36,6 +39,7 @@ from app.services.knowledge_store import service
 from app.services.knowledge_store import pyq_service
 from app.services.knowledge_store import formula_service
 from app.services.knowledge_store import mock_paper_service
+from app.services.knowledge_store import coverage_service
 
 router = APIRouter(prefix="", tags=["knowledge_store"])
 
@@ -676,4 +680,54 @@ async def create_mock_paper(body: MockPaperRequest) -> MockPaperResponse:
         questions=[MockPaperQuestionItem(**q) for q in result["questions"]],
         total_marks=result["total_marks"],
         warnings=result["warnings"],
+    )
+
+
+# ===========================================================================
+# Coverage Tracker endpoint (Task 9)
+# ===========================================================================
+
+
+class TopicBadgeItem(BaseModel):
+    topic_id: str
+    topic_name: str
+    module_id: str
+    badge: Optional[str]  # "grounded" | "partial" | "needs_review" | None
+
+
+class CoverageResponse(BaseModel):
+    grounded_count: int
+    partial_count: int
+    needs_review_count: int
+    no_notes_count: int
+    total_topics: int
+    coverage_percentage: int
+    topics: List[TopicBadgeItem]
+
+
+@router.get("/coverage", response_model=CoverageResponse)
+async def get_coverage() -> CoverageResponse:
+    """
+    GET /coverage
+
+    Returns syllabus coverage metrics:
+      - grounded_count, partial_count, needs_review_count, no_notes_count
+      - total_topics
+      - coverage_percentage = round((grounded_count / total_topics) * 100)
+      - per-topic badge status list for the syllabus outline UI
+
+    Updates within 5 seconds of any note generation or badge change
+    (callers should poll or subscribe to this endpoint).
+    """
+    async with get_db() as session:
+        data = await coverage_service.get_coverage_metrics(session)
+
+    return CoverageResponse(
+        grounded_count=data["grounded_count"],
+        partial_count=data["partial_count"],
+        needs_review_count=data["needs_review_count"],
+        no_notes_count=data["no_notes_count"],
+        total_topics=data["total_topics"],
+        coverage_percentage=data["coverage_percentage"],
+        topics=[TopicBadgeItem(**t) for t in data["topics"]],
     )
