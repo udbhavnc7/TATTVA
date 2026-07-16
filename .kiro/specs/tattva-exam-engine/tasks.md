@@ -33,14 +33,14 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [x] 3.5 Write property-based tests for Property 5 (every chunk has a valid page number in `[1, N]`) and Property 6 (chunk token counts in `[400, 600]` except last-chunk merge) — min 100 examples each.
   - [x] 3.6 Write unit tests for: OCR fallback trigger, blank-page logging, sentence-boundary splitting, and final-chunk merging.
 
-- [ ] 4. Classification Service
+- [x] 4. Classification Service
   Map parsed content to the subject/module/topic taxonomy using LLM; create new taxonomy records; flag low-confidence results for review.
-  - [ ] 4.1 Implement the LLM classification prompt (`C1`) call — input is document headings and content; output must conform to the JSON schema `{ subject, module_number, topic, is_new_topic, confidence, note? }`.
-  - [ ] 4.2 Implement single-retry logic on LLM error or JSON parse failure; mark document `classification_failed` and halt after both attempts fail.
-  - [ ] 4.3 Implement taxonomy record creation — write new `subjects`, `modules`, and `topics` rows in a single atomic transaction **before** the document proceeds to chunking; enforce foreign-key ordering.
-  - [ ] 4.4 Implement low-confidence handling — set `pending_review = true` and populate `note` (max 200 chars) on the `classifications` record when `confidence == "low"`.
-  - [ ] 4.5 Write property-based tests for Property 7 (classification output always conforms to schema) and Property 8 (low-confidence `note` is present and ≤ 200 chars) — min 100 examples each.
-  - [ ] 4.6 Write unit tests for: high/medium/low confidence paths, retry-then-fail path, and new taxonomy record creation order.
+  - [x] 4.1 Implement the LLM classification prompt (`C1`) call — input is document headings and content; output must conform to the JSON schema `{ subject, module_number, topic, is_new_topic, confidence, note? }`.
+  - [x] 4.2 Implement single-retry logic on LLM error or JSON parse failure; mark document `classification_failed` and halt after both attempts fail.
+  - [x] 4.3 Implement taxonomy record creation — write new `subjects`, `modules`, and `topics` rows in a single atomic transaction **before** the document proceeds to chunking; enforce foreign-key ordering.
+  - [x] 4.4 Implement low-confidence handling — set `pending_review = true` and populate `note` (max 200 chars) on the `classifications` record when `confidence == "low"`.
+  - [x] 4.5 Write property-based tests for Property 7 (classification output always conforms to schema) and Property 8 (low-confidence `note` is present and ≤ 200 chars) — min 100 examples each.
+  - [x] 4.6 Write unit tests for: high/medium/low confidence paths, retry-then-fail path, and new taxonomy record creation order.
 
 - [x] 5. Knowledge Store — CRUD, Semantic Search, and Subject Management
   Implement all Knowledge Store endpoints including semantic search, subject/module CRUD, and chunk tagging enforcement.
