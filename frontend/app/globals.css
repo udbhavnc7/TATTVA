@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tattva dark theme — always dark, no light mode */
+    --background: 0 0% 0%;          /* #000000 */
+    --foreground: 0 0% 100%;        /* #ffffff */
+
+    --card: 0 0% 7%;                /* #111111 */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 10%;            /* #1a1a1a */
+    --popover-foreground: 0 0% 100%;
+
+    /* Gold accent: #C9A84C → approx hsl(41 53% 55%) */
+    --primary: 41 53% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 10%;          /* #1a1a1a */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 41 53% 55%;           /* gold */
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 15%;
+    --ring: 41 53% 55%;             /* gold ring */
+
+    --radius: 0.5rem;
+  }
+
+  /* Force dark mode globally — no .dark class toggle needed */
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111111;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C9A84C;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #e0bc60;
+  }
+}
