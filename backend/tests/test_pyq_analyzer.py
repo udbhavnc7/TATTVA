@@ -207,19 +207,20 @@ class TestPostPyqs:
         pyq_mock = _make_pyq_mock(subject_id=subject_id)
         _, mock_cm = _make_db_mock(pyq_mock)
 
+        llm_result = {
+            "matched_topic_id": None,
+            "confidence": "low",
+            "difficulty": "medium",
+            "difficulty_note": "Standard recall.",
+        }
+
         with (
             patch("app.services.knowledge_store.router.get_db", return_value=mock_cm),
-            patch("google.generativeai.GenerativeModel") as mock_model_cls,
+            patch(
+                "app.services.knowledge_store.pyq_service._call_llm_for_topic_match",
+                return_value=llm_result,
+            ),
         ):
-            mock_model = MagicMock()
-            mock_model_cls.return_value = mock_model
-            mock_response = MagicMock()
-            mock_response.text = (
-                '{"matched_topic_id": null, "confidence": "low", '
-                '"difficulty": "medium", "difficulty_note": "Standard recall."}'
-            )
-            mock_model.generate_content.return_value = mock_response
-
             resp = await client.post(
                 "/pyqs",
                 json={
@@ -372,19 +373,20 @@ class TestPostPyqs:
         )
         _, mock_cm = _make_db_mock(pyq_mock)
 
+        llm_result = {
+            "matched_topic_id": None,
+            "confidence": "low",
+            "difficulty": "easy",
+            "difficulty_note": "No match found.",
+        }
+
         with (
             patch("app.services.knowledge_store.router.get_db", return_value=mock_cm),
-            patch("google.generativeai.GenerativeModel") as mock_model_cls,
+            patch(
+                "app.services.knowledge_store.pyq_service._call_llm_for_topic_match",
+                return_value=llm_result,
+            ),
         ):
-            mock_model = MagicMock()
-            mock_model_cls.return_value = mock_model
-            mock_response = MagicMock()
-            mock_response.text = (
-                '{"matched_topic_id": null, "confidence": "low", '
-                '"difficulty": "easy", "difficulty_note": "No match found."}'
-            )
-            mock_model.generate_content.return_value = mock_response
-
             resp = await client.post(
                 "/pyqs",
                 json={
@@ -421,11 +423,13 @@ class TestPostPyqsRecalculate:
 
         with (
             patch("app.services.knowledge_store.router.get_db", return_value=mock_cm),
-            patch("google.generativeai.GenerativeModel") as mock_model_cls,
+            patch(
+                "app.services.knowledge_store.pyq_service._call_llm_for_topic_match",
+            ) as mock_llm,
         ):
             resp = await client.post("/pyqs/recalculate")
             # LLM must NOT have been called
-            mock_model_cls.assert_not_called()
+            mock_llm.assert_not_called()
 
         assert resp.status_code == 200
         body = resp.json()

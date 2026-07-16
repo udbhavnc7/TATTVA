@@ -14,6 +14,11 @@ PYQ Analyzer endpoints (Task 10):
     GET    /pyqs                      — List PYQs with optional filters
     POST   /pyqs/recalculate          — Deterministic SQL importance recalculation
     GET    /topics/{id}/importance    — Get topic importance score
+
+Formula Scanner endpoints (Task 13):
+    GET    /formulas/{subject_id}             — Extract formulas from all chunks for subject
+    POST   /formulas/{subject_id}/scan        — Re-run extraction and return completion notification
+    GET    /formulas/{subject_id}/export      — Download formula table as .md file
 """
 
 from __future__ import annotations
@@ -24,9 +29,12 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from fastapi.responses import Response
+
 from app.db.session import get_db
 from app.services.knowledge_store import service
 from app.services.knowledge_store import pyq_service
+from app.services.knowledge_store import formula_service
 
 router = APIRouter(prefix="", tags=["knowledge_store"])
 
@@ -476,3 +484,119 @@ async def get_topic_importance(topic_id: uuid.UUID) -> TopicImportanceResponse:
     async with get_db() as session:
         data = await pyq_service.get_topic_importance(session, topic_id)
         return TopicImportanceResponse(**data)
+
+
+# ===========================================================================
+# Formula Scanner endpoints (Task 13)
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Pydantic schemas for Formula Scanner
+# ---------------------------------------------------------------------------
+
+
+class FormulaItem(BaseModel):
+    formula_or_algorithm: str
+    variables: str
+    source: str
+
+
+class FormulaListResponse(BaseModel):
+    subject_id: str
+    formulas: List[FormulaItem]
+    rendered_table: str
+
+
+class FormulaScanResponse(BaseModel):
+    subject_id: str
+    formula_count: int
+    status: str
+
+
+# ---------------------------------------------------------------------------
+# GET /formulas/{subject_id} — extract and return formulas
+# ---------------------------------------------------------------------------
+
+
+@router.get("/formulas/{subject_id}", response_model=FormulaListResponse)
+async def get_formulas(subject_id: uuid.UUID) -> FormulaListResponse:
+    """
+    GET /formulas/{subject_id}
+
+    Scan all chunks for the subject, extract every formula/equation/algorithm
+    pseudocode using regex/heuristic extraction (no LLM).
+
+    Incomplete formulas (containing '...' or cut off mid-expression) are
+    flagged with '[incomplete in source]'.
+
+    Returns JSON:
+      { subject_id, formulas: [...], rendered_table: str }
+
+    The rendered_table is a Markdown table; falls back to a numbered list if
+    table rendering raises an error.
+    """
+    async with get_db() as session:
+        result = await formula_service.scan_formulas(session, subject_id)
+
+    return FormulaListResponse(
+        subject_id=result["subject_id"],
+        formulas=[FormulaItem(**f) for f in result["formulas"]],
+        rendered_table=result["rendered_table"],
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /formulas/{subject_id}/scan — re-run extraction
+# ---------------------------------------------------------------------------
+
+
+@router.post("/formulas/{subject_id}/scan", response_model=FormulaScanResponse)
+async def scan_formulas(subject_id: uuid.UUID) -> FormulaScanResponse:
+    """
+    POST /formulas/{subject_id}/scan
+
+    Re-run formula extraction against the current Knowledge Store state and
+    return a completion notification.
+
+    Returns JSON:
+      { subject_id, formula_count: int, status: "completed" }
+    """
+    async with get_db() as session:
+        result = await formula_service.scan_formulas(session, subject_id)
+
+    return FormulaScanResponse(
+        subject_id=result["subject_id"],
+        formula_count=len(result["formulas"]),
+        status="completed",
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /formulas/{subject_id}/export — download as .md file
+# ---------------------------------------------------------------------------
+
+
+@router.get("/formulas/{subject_id}/export")
+async def export_formulas(subject_id: uuid.UUID) -> Response:
+    """
+    GET /formulas/{subject_id}/export
+
+    Return the formula table as a downloadable Markdown file.
+
+    Response headers:
+      Content-Type: text/markdown
+      Content-Disposition: attachment; filename="formulas_<subject_id>.md"
+    """
+    async with get_db() as session:
+        result = await formula_service.scan_formulas(session, subject_id)
+
+    md_content = result["rendered_table"]
+    filename = f"formulas_{subject_id}.md"
+
+    return Response(
+        content=md_content,
+        media_type="text/markdown",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
+    )

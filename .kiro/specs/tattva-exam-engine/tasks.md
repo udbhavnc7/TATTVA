@@ -87,15 +87,15 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [ ] 9.3 Expose per-topic badge status in the coverage endpoint to support the syllabus outline UI.
   - [ ] 9.4 Write property-based tests for Property 20 (coverage percentage matches formula for any badge distribution) — min 100 examples.
 
-- [ ] 10. PYQ Analyzer
+- [x] 10. PYQ Analyzer
   Implement PYQ ingestion, LLM-based topic matching, deterministic SQL importance scoring, and frequency data endpoints.
-  - [ ] 10.1 Implement `POST /pyqs` — validate fields: `year` (2000–current year), `marks` (1–100), `question_text` (10–2000 characters); return `400` identifying the specific invalid field on failure.
-  - [ ] 10.2 Implement LLM topic matching (prompt `C5`) — set `topic_id` on match; set `topic_id = null` and `is_unmatched = true` when no match has sufficient confidence.
-  - [ ] 10.3 Store estimated `difficulty` (`easy` | `medium` | `hard`) and `difficulty_note` (≤ 200 chars) per PYQ for audit; store `secondary_topics` array.
-  - [ ] 10.4 Implement `POST /pyqs/recalculate` — run the deterministic SQL `COUNT(*) GROUP BY topic_id` upsert into `topic_importance`; must complete in ≤ 10 seconds for 500 PYQ records; frequency counting must never be delegated to an LLM.
-  - [ ] 10.5 Implement `GET /pyqs` with filters and `GET /topics/{id}/importance`.
-  - [ ] 10.6 Write property-based tests for Property 21 (PYQ field validation predicate), Property 22 (topic importance deterministically computed), and Property 23 (unseen topics default to `frequency_count = 0`) — min 100 examples each.
-  - [ ] 10.7 Write unit tests for: valid/invalid field combinations, unmatched topic handling, and SQL count verification.
+  - [x] 10.1 Implement `POST /pyqs` — validate fields: `year` (2000–current year), `marks` (1–100), `question_text` (10–2000 characters); return `400` identifying the specific invalid field on failure.
+  - [x] 10.2 Implement LLM topic matching (prompt `C5`) — set `topic_id` on match; set `topic_id = null` and `is_unmatched = true` when no match has sufficient confidence.
+  - [x] 10.3 Store estimated `difficulty` (`easy` | `medium` | `hard`) and `difficulty_note` (≤ 200 chars) per PYQ for audit; store `secondary_topics` array.
+  - [x] 10.4 Implement `POST /pyqs/recalculate` — run the deterministic SQL `COUNT(*) GROUP BY topic_id` upsert into `topic_importance`; must complete in ≤ 10 seconds for 500 PYQ records; frequency counting must never be delegated to an LLM.
+  - [x] 10.5 Implement `GET /pyqs` with filters and `GET /topics/{id}/importance`.
+  - [x] 10.6 Write property-based tests for Property 21 (PYQ field validation predicate), Property 22 (topic importance deterministically computed), and Property 23 (unseen topics default to `frequency_count = 0`) — min 100 examples each.
+  - [x] 10.7 Write unit tests for: valid/invalid field combinations, unmatched topic handling, and SQL count verification.
 
 - [ ] 11. Mock Exam Paper Assembler
   Implement PYQ-weighted mock paper assembly with importance ordering, tie-breaking, and insufficient-bank handling.
@@ -116,12 +116,12 @@ This plan implements the Tattva Exam Engine — an AI-powered exam preparation p
   - [ ] 12.5 Write property-based tests for Property 25 (flashcard count per note is 4–6), Property 26 (initial ease_factor is 2.5), Property 27 (SM-2 update is deterministic and correct), and Property 28 (invalid recall score rejected, state unchanged) — min 100 examples each.
   - [ ] 12.6 Write unit tests for: recall score 0 restart, recall score 5 max-EF, and `next_review_at` is always in the future.
 
-- [ ] 13. Formula Scanner
+- [x] 13. Formula Scanner
   Extract formulas, equations, and algorithm pseudocode from chunks; expose as a structured downloadable Markdown table.
-  - [ ] 13.1 Implement `GET /formulas/{subject_id}` — scan chunks for the subject, extract every formula/equation/algorithm pseudocode; flag incomplete formulas as `[incomplete in source]` without completing them.
-  - [ ] 13.2 Render results as a Markdown table with columns: `Formula/Algorithm`, `Variables`, `Source`; fall back to a numbered list with the same three fields if table rendering fails.
-  - [ ] 13.3 Implement `POST /formulas/{subject_id}/scan` — re-run extraction against current Knowledge Store state and return a completion notification.
-  - [ ] 13.4 Implement `GET /formulas/{subject_id}/export` — return the formula table as a downloadable `.md` file.
+  - [x] 13.1 Implement `GET /formulas/{subject_id}` — scan chunks for the subject, extract every formula/equation/algorithm pseudocode; flag incomplete formulas as `[incomplete in source]` without completing them.
+  - [x] 13.2 Render results as a Markdown table with columns: `Formula/Algorithm`, `Variables`, `Source`; fall back to a numbered list with the same three fields if table rendering fails.
+  - [x] 13.3 Implement `POST /formulas/{subject_id}/scan` — re-run extraction against current Knowledge Store state and return a completion notification.
+  - [x] 13.4 Implement `GET /formulas/{subject_id}/export` — return the formula table as a downloadable `.md` file.
 
 - [ ] 14. Parser/Serializer Round-Trip Integrity Tests
   Verify that chunk and note objects survive database serialize/deserialize with no field mutation (Properties 29 and 30).
